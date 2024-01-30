@@ -1,0 +1,66 @@
+version: "3.9"
+services:
+  servername-eureka:
+    build:
+      context: .
+      dockerfile: eureka.df
+    container_name: eureka
+    ports:
+    - "8761:8761"
+  servername-mysql:
+    build:
+      context: .
+      dockerfile: mysql.df
+    container_name: db1
+    ports:
+    - "3306:3306"
+    environment:
+    - MYSQL_ROOT_PASSWORD=123
+  servername-mongo:
+    build:
+      context: .
+      dockerfile: mongo.df
+    container_name: mongo
+    ports:
+    - "27017:27017"
+  login:
+    build:
+      context: .
+      dockerfile: login.df
+    container_name: login
+    ports:
+    - "8083:8083"
+    depends_on:
+    - servername-mysql
+    environment:
+    - servername-mysql=servername-mysql
+    - username-db=root
+    - password-db=123
+    - servername-eureka=servername-eureka
+  dashboard:
+    build:
+      context: .
+      dockerfile: dashboard.df
+    container_name: dashboard
+    ports:
+    - "8085:8085"
+    environment:
+    - servername-eureka=servername-eureka
+
+  gateway:
+    build:
+      context: .
+      dockerfile: gw.df
+    container_name: gw
+    ports:
+    - "9094:9094"
+    environment:
+    - servername-eureka=servername-eureka
+
+  frontend:
+    build:
+      context: .
+      dockerfile: harsh-frontend.df
+    container_name: frontend
+    ports:
+    - "8080:80"
